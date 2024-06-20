@@ -69,9 +69,9 @@ class Server:
 
 
     def broadcast_connections(self):
+        message = f'NEW_CONNECTION:{','.join(self.usernames)}'
         for client in self.clients:
-            for user in self.usernames:
-                client.send(f'NEW_CONNECTION:{user}\n'.encode(self.FORMAT))
+            client.send(message.encode(self.FORMAT))
 
     def receive(self):
         # Listen for maximum 10 new connections
@@ -82,7 +82,6 @@ class Server:
             print(f'[SERVER] New connection from {address}')
 
             # Get the username of the new client
-            client.send('USERNAME'.encode(self.FORMAT))
             username = client.recv(self.BYTES).decode(self.FORMAT)
 
             # Append the new variables to the storage lists

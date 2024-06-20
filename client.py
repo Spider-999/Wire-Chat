@@ -61,10 +61,11 @@ class Client(App):
                 message = self.client_socket.recv(self.BYTES).decode(self.FORMAT)
 
                 if message.startswith('NEW_CONNECTION:'):
-                    username = message[len('NEW_CONNECTION:'):]
-                    self.update_connections_list(username)
-                    print(username)
-                elif message != 'USERNAME':
+                    # Check for new usernames to add to the list
+                    usernames = message.split(':')[1].split(',')
+                    print(usernames)
+                    self.update_connections_list(usernames)
+                else:
                     self.insert_text(message, self.chat.message_list)
             except socket.error as error:
                 # If an error occurred print it
@@ -74,10 +75,12 @@ class Client(App):
         self.client_socket.close()
 
 
-    def update_connections_list(self, username):
+    def update_connections_list(self, usernames):
+        # Update the connections list
         self.chat.connections_list.configure(state = 'normal')
-        # self.chat.connections_list.delete('1.0', tk.END)
-        self.chat.connections_list.insert(tk.END, username)
+        self.chat.connections_list.delete('1.0', tk.END)
+        for user in usernames:
+            self.chat.connections_list.insert(tk.END, user + '\n')
         self.chat.connections_list.configure(state = 'disabled')
 
 
