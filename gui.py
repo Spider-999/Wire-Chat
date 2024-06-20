@@ -52,9 +52,10 @@ class Chat(tk.Frame):
         self.send_button.grid(row=1, column=1, ipadx=30, padx=30)
 
         # Connections list
-        self.connections_frame = ttk.Frame(master=self, height=20, width=20)
+        self.connections_frame = ttk.Frame(master=self, height=200, width=200)
         self.connections_frame.grid(row=0, column=1)
-        self.connections_list = ctk.CTkScrollableFrame(master=self.connections_frame, height=400, width=100)
+        self.connections_list = ctk.CTkTextbox(master=self.connections_frame, height=200, width=200, state='disabled',
+                                               corner_radius=16, border_color='#000000', border_width=1)
         self.connections_list.pack(side=tk.LEFT)
 
         self.pack(fill=tk.BOTH, expand=1)
@@ -114,4 +115,3 @@ class App:
         self.frame_list[self.LOGIN_INDEX].forget()
         self.frame_list[self.CHAT_INDEX].tkraise()
         self.frame_list[self.CHAT_INDEX].pack(fill='both', expand = 1)
-

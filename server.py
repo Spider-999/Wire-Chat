@@ -22,11 +22,11 @@ import threading
 class Server:
     def __init__(self):
         # Setup variables
-        self.HOST = '127.0.0.1'
+        self.HOST = '192.168.0.102'
         self.PORT = 50000
-        self.BYTES = 512
+        self.BYTES = 4096
         self.FORMAT = 'utf-8'
-        self.MAX_CONNECTIONS = 5
+        self.MAX_CONNECTIONS = 10
 
         # Setting the socket options to allow for reconnection and creating the server socket
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -40,17 +40,22 @@ class Server:
     def handle_client(self, client):
         while True:
             try:
-                message = client.recv(self.BYTES).decode('utf-8')
+                message = client.recv(self.BYTES).decode(self.FORMAT)
+
                 print(f'{self.usernames[self.clients.index(client)]}:{message}')
-                self.broadcast(message, client)
+                self.broadcast(f'{self.usernames[self.clients.index(client)]}:{message}', client)
             except socket.error as error:
                 print(error)
+
                 # Remove username and client from the arrays
                 user_index = self.clients.index(client)
                 self.clients.remove(client)
 
                 username = self.usernames[user_index]
                 self.usernames.remove(username)
+
+                # Update the connections list when someone disconnects
+                self.broadcast_connections()
 
                 print(f'[SERVER] {username} disconnected.')
                 self.broadcast(f'[SERVER] {username} disconnected.', client)
@@ -60,7 +65,13 @@ class Server:
     def broadcast(self, message, this_client):
         for client in self.clients:
             if client != this_client:
-                client.send(f'{self.usernames[self.clients.index(this_client)]}:{message}'.encode(self.FORMAT))
+                client.send(message.encode(self.FORMAT))
+
+
+    def broadcast_connections(self):
+        for client in self.clients:
+            for user in self.usernames:
+                client.send(f'NEW_CONNECTION:{user}\n'.encode(self.FORMAT))
 
     def receive(self):
         # Listen for maximum 10 new connections
@@ -73,15 +84,19 @@ class Server:
             # Get the username of the new client
             client.send('USERNAME'.encode(self.FORMAT))
             username = client.recv(self.BYTES).decode(self.FORMAT)
-            print(username)
+
             # Append the new variables to the storage lists
             self.usernames.append(username)
             self.clients.append(client)
 
+            # Send the username list to the client to be appended to the active connections list
+            self.broadcast_connections()
+
             # Let everyone know someone joined and show the new client that the connection was successful
-            print(f'[SERVER] {username} joined the chat.')
-            self.broadcast(f'joined the chat.', client)
+            print(f'[SERVER] {username} joined the chat.\n')
+            self.broadcast(f'{self.usernames[self.clients.index(client)]} joined the chat.\n', client)
             client.send('[SERVER] Connected.'.encode(self.FORMAT))
+
 
             # Start a server thread
             server_thread = threading.Thread(target=self.handle_client, args=(client,))

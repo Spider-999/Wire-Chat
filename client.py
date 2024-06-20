@@ -29,7 +29,7 @@ class Client(App):
         self.login.connect_button.configure(command=self.get_username)
 
         # Sockets setup
-        self.HOST = '127.0.0.1'
+        self.HOST = '192.168.0.102'
         self.PORT = 50000
         self.BYTES = 4096
         self.FORMAT = 'utf-8'
@@ -44,7 +44,7 @@ class Client(App):
             message = self.chat.entry_message.get()
 
             if message != '':
-                self.insert_text(f'you:{message}')
+                self.insert_text(f'you:{message}', self.chat.message_list)
                 self.chat.entry_message.set('')
 
                 # Encode it and send it to the server
@@ -59,22 +59,33 @@ class Client(App):
         while True:
             try:
                 message = self.client_socket.recv(self.BYTES).decode(self.FORMAT)
-                if message != 'USERNAME':
-                    self.insert_text(message)
-                    print(message)
+
+                if message.startswith('NEW_CONNECTION:'):
+                    username = message[len('NEW_CONNECTION:'):]
+                    self.update_connections_list(username)
+                    print(username)
+                elif message != 'USERNAME':
+                    self.insert_text(message, self.chat.message_list)
             except socket.error as error:
                 # If an error occurred print it
                 print(f'[RECEIVE_MESSAGE] {error}')
                 break
-        self.insert_text('[SERVER] - Connection lost.')
+        self.insert_text('[SERVER] - Connection lost.', self.chat.message_list)
         self.client_socket.close()
 
 
-    def insert_text(self, message):
+    def update_connections_list(self, username):
+        self.chat.connections_list.configure(state = 'normal')
+        # self.chat.connections_list.delete('1.0', tk.END)
+        self.chat.connections_list.insert(tk.END, username)
+        self.chat.connections_list.configure(state = 'disabled')
+
+
+    def insert_text(self, message, widget):
         # Insert text in the chat
-        self.chat.message_list.configure(state = 'normal')
-        self.chat.message_list.insert(tk.END, message + '\n')
-        self.chat.message_list.configure(state = 'disabled')
+        widget.configure(state = 'normal')
+        widget.insert(tk.END, message + '\n')
+        widget.configure(state = 'disabled')
 
 
     def get_username(self):
