@@ -1,9 +1,6 @@
 # Wire-Chat
 A python desktop chatting application made with sockets and customtkinter.
 
-Needed packages:
-pip install customtkinter
-
 TODO:
 - improve GUI looks.
 - Add connected users to a separate panel (Done)
