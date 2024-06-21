@@ -6,7 +6,7 @@ pip install customtkinter
 
 TODO:
 - improve GUI looks.
-- Add connected users to a separate panel
+- Add connected users to a separate panel (Done)
 - Add FTP
 - Maybe VOIP
 - Add emojis
