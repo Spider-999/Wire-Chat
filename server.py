@@ -22,7 +22,7 @@ import threading
 class Server:
     def __init__(self):
         # Setup variables
-        self.HOST = '192.168.0.102'
+        self.HOST = '127.0.0.1'
         self.PORT = 50000
         self.BYTES = 4096
         self.FORMAT = 'utf-8'
@@ -92,8 +92,8 @@ class Server:
             self.broadcast_connections()
 
             # Let everyone know someone joined and show the new client that the connection was successful
-            print(f'[SERVER] {username} joined the chat.\n')
-            self.broadcast(f'{self.usernames[self.clients.index(client)]} joined the chat.\n', client)
+            print(f'[SERVER] {username} joined the chat.')
+            self.broadcast(f'{self.usernames[self.clients.index(client)]} joined the chat.', client)
             client.send('[SERVER] Connected.'.encode(self.FORMAT))
 
 
